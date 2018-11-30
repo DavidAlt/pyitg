@@ -7,5 +7,6 @@ itg
 template_models
   class: AhltaTemplate :: template model, stores text in dictionary
   class: AhltaTemplateDF :: template model, stores text in dataframe
+  class: AhltaTemplateXml :: template model, stores text as xml 
 
 #class: Converter :: converts between raw text, dictionary, dataframe, xml
