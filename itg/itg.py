@@ -104,7 +104,9 @@ class ControlFlag(IntFlag):
 #  PARSER: extracts info from a template or item strings
 # ============================================================================
 
-class item_parser:     
+import re
+
+class parser:
 
     # Simple parse (no subparsing)
     def PAGE(line): 
@@ -209,11 +211,11 @@ class item_parser:
             for token in tokens: 
                 key = re.search('(.*?)(?==)', token).group(1)
                 value = re.search('(?<==)(.*)', token).group(1)
-                log.info(key + ' :: ' + value)
+                #log.info(key + ' :: ' + value)
                 options[key] = value            
             
-            log.info(f'Tokens: {tokens}')
-            log.info(f'Dictionary: {options}')
+            #log.info(f'Tokens: {tokens}')
+            #log.info(f'Dictionary: {options}')
         
         else: 
             log.error('String didn\'t contain any options.')
@@ -226,3 +228,112 @@ class item_parser:
 #  VALIDATOR: validates template or item data
 # ============================================================================
 
+class validator:
+    # ============================================================================
+    #  Template validation
+    # ============================================================================
+    def validate_item_options(item):
+        def_options = ['K', 'T', 'S', 'W', 'B', 'I', 'F', 'Z', 'U', 'C', 'N', 'L', 'O', 'P']
+        checkbox_options = ['Y']
+        frame_options = ['H', 'T']
+        browsetree_options = ['I', 'B', 'S']
+        grid_options = ['E', 'O', 'A', 'P', 'R', 'W']
+        ribbon_options = ['G', 'T', 'R', 'Y', 'B', 'C', 'S', 'H', 'O']
+        tabstrip_options = ['BS', 'CB', 'DF', 'EM', 'FB', 'HHL', 'MR', 'NB', 'PB', 'PL',
+                            'PS', 'ROS', 'TP', 'TWS', 'V']
+        medcin_options = ['O']
+        list_options = ['G', 'O']
+        valuebox_options = ['V']
+        picture_options = ['MR', 'O']
+
+        valid_options = True
+
+        print(f'Flag: {parser.FLAGS(item)}')
+        print(f'Controls: {parser.parse_flags(parser.FLAGS(item))}')
+        controls = parser.parse_flags(parser.FLAGS(item)).split('|')
+
+        if ('CHKY' in controls or 'CHKN' in controls):
+            print('chck present')
+        # if
+
+    def validate_form_signature(form_signature):
+        # line should contain 1 entry, enclosed in " "
+        valid_count = True
+        valid_entries = True
+
+        form_signature = form_signature.rstrip()  # remove newline
+        # use list comprehension to split and strip at once
+        tokens = [x.strip() for x in form_signature.split(',')]
+        if (len(tokens) != 1):
+            valid_count = False
+            log.error(f'invalid number of entries ({len(tokens)}); should be 1.')
+
+        if (form_signature[0] != r'"' or form_signature[len(form_signature) - 1] != r'"'):
+            valid_entries = False
+            log.error(f'\'{form_signature}\' is not enclosed in double quotes (\"...")')
+
+        return (valid_count and valid_entries)
+
+    def validate_form_identification(form_identification):
+        # line should contain 3 or 4 entries, each enclosed in " "
+        valid_count = True
+        valid_entries = True
+
+        # use list comprehension to split and strip at once
+        tokens = [x.strip() for x in form_identification.split(',')]
+        if (len(tokens) < 3 or
+                len(tokens) > 4):
+            valid_count = False
+            log.error(f'invalid number of entries ({len(tokens)}); should be 3 or 4.')
+
+        for token in tokens:
+            if (token[0] != r'"' or token[(len(token) - 1)] != r'"'):
+                valid_entries = False
+                log.error(f'\'{token}\' is not enclosed in double quotes (\"...")')
+
+        return (valid_count and valid_entries)
+
+    def validate_form_obj(form_obj):
+        valid_form_obj = True
+        tokens = [x.strip() for x in form_obj.split(',', maxsplit=9)]
+
+        # Vulnerability: doesn't check for >10 fields b/c too lazy to distinguish DESCRIPTION
+        if (len(tokens) < 10):
+            valid_form_obj = False
+            log.error(f'invalid number of fields ({len(tokens)}) (should be 10)')
+
+        if int(parser.FLAGS(form_obj)) != ControlFlag.FORM:
+            valid_form_obj = False
+            log.error('Incorrect ControlFlag (should be 1048576)')
+
+        # ToDo:
+        #   PAGE should be 0
+        #   LEFT and TOP should be int and 0
+        #   RIGHT and BOTTOM should be int and >0
+        #   MEDCIN_ID should be 0
+        #   PREFIX should be ""
+        #   ITEM_DATA should be ""
+        #   DESCRIPTION should be ""
+
+        return valid_form_obj
+
+    def validate_tabstrip_obj(tabstrip_obj):
+        pass
+        # ToDo:
+        # ControlFlag should be 32
+        # PAGE should be last page
+        # LEFT, TOP, RIGHT, BOTTOM should be 5,377,295,395 (but I don't know why)
+        # MEDCIN_ID should be 0
+        # valid PREFIX: 26 entries (even if blank; don't strip whitespace)
+        # valid ITEM_DATA: no invalid entries
+        # valid DESCRIPTION: page label count == PAGE
+        #5, 5, 377, 295, 395, 0, 32,
+        #" |||||||0|0||0|0|||0|||0|0|0|0|0|0|||",
+        #"L=V=13:DF=1:PS=1:TP=0:MR=T:BS=0:TWS=0:PB=2:NB=3:ROS=1:PL=1:FB=1:EM=1:CB=2:HHL=F",
+        #":-2147483633:Provider|%3Development|%2Screening|Procedures|Resources"
+
+    def validate_browsetree_obj(browsetree_obj):
+        pass
+
+    def validate_form_item(form_item):
+        return len(form_item.split(',', maxsplit=9)) == 10
