@@ -1,0 +1,11 @@
+
+itg
+  constants
+  class: Parser :: extracts information from the template or item strings
+  class: Validator :: ensures information is valid
+    
+template_models
+  class: AhltaTemplate :: template model, stores text in dictionary
+  class: AhltaTemplateDF :: template model, stores text in dataframe
+
+#class: Converter :: converts between raw text, dictionary, dataframe, xml
