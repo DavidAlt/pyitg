@@ -98,7 +98,18 @@ class ControlFlag(IntFlag):
     WINDOW = 536870912 # Window
     TIMING = 1073741824 # Timing Button component
 
+    # ToDo:
+    #   function to generate flag (int) from controls (list)
+    #   this really only works in a visual/gui sense
 
+    def parse(flags):
+        if flags == 1:
+            result = 'LINE'
+        elif flags == 2:
+            result = 'BOX'
+        else:
+            result = str(ControlFlag(flags)).replace('ControlFlag.','')
+        return result
 
 # ============================================================================
 #  PARSER: extracts info from a template or item strings
@@ -106,7 +117,7 @@ class ControlFlag(IntFlag):
 
 import re
 
-class parser:
+class Parser:
 
     # Simple parse (no subparsing)
     def PAGE(line): 
@@ -173,20 +184,6 @@ class parser:
         result += description
         return result
 
-
-    # ToDo:
-    #   function to generate flag (int) from controls (list)
-    #   this really only works in a visual/gui sense
-
-    def parse_flags(flags):
-        if flags == 1:
-            result = 'LINE'
-        elif flags == 2:
-            result = 'BOX'
-        else:
-            result = str(ControlFlag(flags)).replace('ControlFlag.','')
-        return result
-
     
     def parse_options(item_data):
         log.warning('Does not parse L=V= properly')
@@ -228,7 +225,7 @@ class parser:
 #  VALIDATOR: validates template or item data
 # ============================================================================
 
-class validator:
+class Validator:
     # ============================================================================
     #  Template validation
     # ============================================================================
@@ -248,9 +245,9 @@ class validator:
 
         valid_options = True
 
-        print(f'Flag: {parser.FLAGS(item)}')
-        print(f'Controls: {parser.parse_flags(parser.FLAGS(item))}')
-        controls = parser.parse_flags(parser.FLAGS(item)).split('|')
+        print(f'Flag: {Parser.FLAGS(item)}')
+        print(f'Controls: {ControlFlag.parse(Parser.FLAGS(item))}')
+        controls = ControlFlag.parse(Parser.FLAGS(item)).split('|')
 
         if ('CHKY' in controls or 'CHKN' in controls):
             print('chck present')
@@ -302,7 +299,7 @@ class validator:
             valid_form_obj = False
             log.error(f'invalid number of fields ({len(tokens)}) (should be 10)')
 
-        if int(parser.FLAGS(form_obj)) != ControlFlag.FORM:
+        if int(Parser.FLAGS(form_obj)) != ControlFlag.FORM:
             valid_form_obj = False
             log.error('Incorrect ControlFlag (should be 1048576)')
 

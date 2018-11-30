@@ -13,12 +13,12 @@ log.setLevel(logging.DEBUG)
 # ============================================================================
 
 
-#from ahlta_item import item_parser as parse
+#from ahlta_item import item_Parser as parse
 #from itg_utils import control_flag
 import re
 import itg
 
-class ahlta_template:
+class AhltaTemplate:
     
     # Constructor
     def __init__(self, fhand):
@@ -75,18 +75,18 @@ class ahlta_template:
         self.browsetree = self.header[4]
         
         # ensure we've got the Form line (3rd line of header) before getting width, height
-        if int(itg.parser.FLAGS(self.form_obj)) == itg.ControlFlag.FORM:
+        if int(itg.Parser.FLAGS(self.form_obj)) == itg.ControlFlag.FORM:
             
-            self.form_width = itg.parser.RIGHT(self.form_obj)
-            self.form_height = itg.parser.BOTTOM(self.form_obj)
+            self.form_width = itg.Parser.RIGHT(self.form_obj)
+            self.form_height = itg.Parser.BOTTOM(self.form_obj)
             
         else:
             print('ERROR: Incorrect flag on line 3 of header (should be 1048576')
             print(f'Line 3 of header:  {self.form_obj}')
             
         # ensure we've got the TabStrip obj
-        if int(itg.parser.FLAGS(self.tabstrip)) == itg.ControlFlag.TABSTRIP:
-            form_backcolor_search = re.search('(?<=:)(.*?)(?=:)', itg.parser.DESCRIPTION(self.tabstrip))
+        if int(itg.Parser.FLAGS(self.tabstrip)) == itg.ControlFlag.TABSTRIP:
+            form_backcolor_search = re.search('(?<=:)(.*?)(?=:)', itg.Parser.DESCRIPTION(self.tabstrip))
             if form_backcolor_search:
                 self.form_backcolor = form_backcolor_search.group(1)
                 
@@ -115,7 +115,7 @@ class ahlta_template:
         #   # (no_browsing), < (left_lateral), > (right_lateral)
         #   %int denotes number of columns on the page
         #   ~int as a suffix denotes a narrative chapter assignment
-        raw = itg.parser.DESCRIPTION(self.header[3])
+        raw = itg.Parser.DESCRIPTION(self.header[3])
         
         tokens = raw.strip('\"').split('|')
         clean_tokens = []
@@ -181,11 +181,16 @@ class ahlta_template:
 # ============================================================================
 #  AhltaTemplateDF: dataframe-based template model
 # ============================================================================
+class AhltaTemplateDF:
+    pass
+
 
 
 # ============================================================================
 #  AhltaTemplateXml: xml-based template model
 # ============================================================================
+class AhltaTemplateXml:
+    pass
 
 
 # ===========================================================================+
@@ -194,7 +199,7 @@ class ahlta_template:
 # ===========================================================================+
 import xml.etree.ElementTree as ET
 #from ahlta_template import ahlta_template
-#from ahlta_item import item_parser as ip
+#from ahlta_item import item_Parser as ip
 
 # Takes a parsed item (from parse_template_item) and returns an xml node
 #   This WILL break if used for items without every property 
@@ -260,7 +265,7 @@ def convert_template_to_xml(template):
         page_node = ET.SubElement(template_xml, node_name)
         
         for item in template.pages[i]:
-            ctrl_flag = str(itg.parser.FLAGS(item))
+            ctrl_flag = str(itg.Parser.FLAGS(item))
             item_node = unparsed_item_to_xml(item, ctrl_flag)
             page_node.append(item_node)
     
