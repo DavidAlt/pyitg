@@ -6,6 +6,7 @@ Created on Mon Nov 26 17:15:29 2018
 """
 import logging
 import re
+import pandas as pd
 
 # ============================================================================
 #  Setup logging
@@ -101,6 +102,26 @@ def detailed_parse(item):
     result.append(item_data)
     result += description
     return result
+
+
+def item_to_simple_series(item):
+    tokens = simple_parse(item)
+    typed_tokens = []
+    typed_tokens.append(int(tokens[0]))
+    typed_tokens.append(int(tokens[1]))
+    typed_tokens.append(int(tokens[2]))
+    typed_tokens.append(int(tokens[3]))
+    typed_tokens.append(int(tokens[4]))
+    typed_tokens.append(int(tokens[5]))
+    typed_tokens.append(int(tokens[6]))
+    typed_tokens.append(tokens[7])
+    typed_tokens.append(tokens[8])
+    typed_tokens.append(tokens[9])
+
+    cols = ['page', 'left', 'top', 'right', 'bottom', 'medcin', 'flags',
+            'prefix', 'item_data', 'description']
+
+    return pd.Series(typed_tokens, index=cols)
 
 
 def parse_prefix(prefix):

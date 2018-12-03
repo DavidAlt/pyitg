@@ -17,12 +17,14 @@ log.setLevel(logging.DEBUG)
 class AhltaTemplate:
     
     # Constructor
-    def __init__(self, fhand):
+    def __init__(self, fhand, logging=True):
         self.header = []
         self.pages = {}
-        
+        self.logging = logging
+
         with open(fhand, 'r', encoding='latin1') as f:
-            log.warning('file arbitrarily opened as latin1 encoding, unsure if this is best way')
+            if self.logging:
+                log.warning('file arbitrarily opened as latin1 encoding')
             self.template = f.readlines()
 
         # TODO make this a try block
@@ -34,13 +36,14 @@ class AhltaTemplate:
 
     # Private Methods
     def _validate_template(self):
-        log.warning('partially implemented')
-        log.info(f'Form Signature:       {itg.validate_form_signature(self.template[0])}')
-        log.info(f'Form Identification:  {itg.validate_form_identification(self.template[1])}')
-        log.info(f'Form Object:          {itg.validate_form_obj(self.template[2])}')
-        log.info(f'Tabstrip Object:      {itg.validate_tabstrip_obj(self.template[3])}')
-        log.info(f'BrowseTree Object:    {itg.validate_browsetree_obj(self.template[4])}')
-        #log.info(f'Form Item:            {itg.Validator.validate_form_item(self.template[5])}')
+        if self.logging:
+            log.warning('partially implemented')
+            log.info(f'Form Signature:       {itg.validate_form_signature(self.template[0])}')
+            log.info(f'Form Identification:  {itg.validate_form_identification(self.template[1])}')
+            log.info(f'Form Object:          {itg.validate_form_obj(self.template[2])}')
+            log.info(f'Tabstrip Object:      {itg.validate_tabstrip_obj(self.template[3])}')
+            log.info(f'BrowseTree Object:    {itg.validate_browsetree_obj(self.template[4])}')
+            #log.info(f'Form Item:            {itg.Validator.validate_form_item(self.template[5])}')
         return True
 
 
@@ -189,10 +192,45 @@ class AhltaTemplate:
 # ============================================================================
 #  AhltaTemplateDF: dataframe-based template model
 # ============================================================================
+import pandas as pd
+
 class AhltaTemplateDF:
-    pass
+    # Constructor
+    def __init__(self, fhand, logging=True):
+        self.header = []
+        self.pages = {}
+        self.logging = logging
 
+        with open(fhand, 'r', encoding='latin1') as f:
+            if self.logging:
+                log.warning('File arbitrarily opened as latin1 encoding.')
+            self.template = f.readlines()
 
+        self._parse_items()
+
+    def _parse_items(self):
+        # Store items in a dataframe of series
+        imported_items = []
+        cols = ['page', 'left', 'top', 'right', 'bottom', 'medcin', 'flags',
+                'prefix', 'item_data', 'description']
+
+        line_num = 1
+        for line in self.template:
+            if line_num <= 5: # first five lines belong to the header
+                self.header.append(line)
+            else:
+                imported_items.append(pd.Series(itg.item_to_simple_series(line), index=cols))
+
+            line_num += 1
+
+        self.items = pd.DataFrame(imported_items, columns=cols)
+
+    # Public methods
+    def info(self):
+        print('Item counts by page:')
+        print(self.items.page.value_counts().sort_index())
+        print('\nFlag counts:')
+        print(self.items.flags.value_counts().sort_index())
 
 # ============================================================================
 #  AhltaTemplateXml: xml-based template model
