@@ -1,7 +1,10 @@
+import logging
+import re
+import itg
+
 # ============================================================================
 #  Setup logging
 # ============================================================================
-import logging
 logging.basicConfig(level=logging.CRITICAL,
                     format='%(levelname)-9s: %(name)s : %(funcName)s() : %(message)s')
 log = logging.getLogger('template_models')
@@ -11,11 +14,6 @@ log.setLevel(logging.DEBUG)
 # ============================================================================
 #  AhltaTemplate: dictionary-based template model
 # ============================================================================
-
-import re
-import itg
-
-
 class AhltaTemplate:
     
     # Constructor
@@ -37,11 +35,11 @@ class AhltaTemplate:
     # Private Methods
     def _validate_template(self):
         log.warning('partially implemented')
-        log.info(f'Form Signature:       {itg.Validator.validate_form_signature(self.template[0])}')
-        log.info(f'Form Identification:  {itg.Validator.validate_form_identification(self.template[1])}')
-        log.info(f'Form Object:          {itg.Validator.validate_form_obj(self.template[2])}')
-        log.info(f'Tabstrip Object:      {itg.Validator.validate_tabstrip_obj(self.template[3])}')
-        log.info(f'BrowseTree Object:    {itg.Validator.validate_browsetree_obj(self.template[4])}')
+        log.info(f'Form Signature:       {itg.validate_form_signature(self.template[0])}')
+        log.info(f'Form Identification:  {itg.validate_form_identification(self.template[1])}')
+        log.info(f'Form Object:          {itg.validate_form_obj(self.template[2])}')
+        log.info(f'Tabstrip Object:      {itg.validate_tabstrip_obj(self.template[3])}')
+        log.info(f'BrowseTree Object:    {itg.validate_browsetree_obj(self.template[4])}')
         #log.info(f'Form Item:            {itg.Validator.validate_form_item(self.template[5])}')
         return True
 
@@ -83,18 +81,18 @@ class AhltaTemplate:
         self.browsetree = self.header[4]
         
         # ensure we've got the Form line (3rd line of header) before getting width, height
-        if int(itg.Parser.FLAGS(self.form_obj)) == itg.ControlFlag.FORM:
+        if int(itg.FLAGS(self.form_obj)) == itg.ControlFlag.FORM:
             
-            self.form_width = itg.Parser.RIGHT(self.form_obj)
-            self.form_height = itg.Parser.BOTTOM(self.form_obj)
+            self.form_width = itg.RIGHT(self.form_obj)
+            self.form_height = itg.BOTTOM(self.form_obj)
             
         else:
             print('ERROR: Incorrect flag on line 3 of header (should be 1048576')
             print(f'Line 3 of header:  {self.form_obj}')
             
         # ensure we've got the TabStrip obj
-        if int(itg.Parser.FLAGS(self.tabstrip)) == itg.ControlFlag.TABSTRIP:
-            form_backcolor_search = re.search('(?<=:)(.*?)(?=:)', itg.Parser.DESCRIPTION(self.tabstrip))
+        if int(itg.FLAGS(self.tabstrip)) == itg.ControlFlag.TABSTRIP:
+            form_backcolor_search = re.search('(?<=:)(.*?)(?=:)', itg.DESCRIPTION(self.tabstrip))
             if form_backcolor_search:
                 self.form_backcolor = form_backcolor_search.group(1)
                 
@@ -123,7 +121,7 @@ class AhltaTemplate:
         #   # (no_browsing), < (left_lateral), > (right_lateral)
         #   %int denotes number of columns on the page
         #   ~int as a suffix denotes a narrative chapter assignment
-        raw = itg.Parser.DESCRIPTION(self.header[3])
+        raw = itg.DESCRIPTION(self.header[3])
         
         tokens = raw.strip('\"').split('|')
         clean_tokens = []
@@ -140,21 +138,23 @@ class AhltaTemplate:
             clean_tokens.append(cleaned_page)
         
         return clean_tokens
- 
+
+
     def _parse_form_properties(self):
         pass
-    # IMPORT VALIDATION: 
-    #   header lines are in the expected place
-    #   form_sid is accounted for
-    #   specified page count matches number of page names (for visible pages, 
-    #       ignoring page 0)
-    #   Form object is the third item, and has a width and height
-    #   TabStrip object is appropriate
-    #   BrowseTree object is appropriate
+
+
     def _validate_header(self):
+        # ToDo:
+        #   header lines are in the expected place
+        #   form_sid is accounted for
+        #   specified page count matches number of page names (for visible pages,
+        #       ignoring page 0)
+        #   Form object is the third item, and has a width and height
+        #   TabStrip object is appropriate
+        #   BrowseTree object is appropriate
         pass
-    
-    
+
     
     # Public Methods
     def info(self):
@@ -273,7 +273,7 @@ def convert_template_to_xml(template):
         page_node = ET.SubElement(template_xml, node_name)
         
         for item in template.pages[i]:
-            ctrl_flag = str(itg.Parser.FLAGS(item))
+            ctrl_flag = str(itg.FLAGS(item))
             item_node = unparsed_item_to_xml(item, ctrl_flag)
             page_node.append(item_node)
     
