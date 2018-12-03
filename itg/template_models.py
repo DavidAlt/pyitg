@@ -15,6 +15,7 @@ log.setLevel(logging.DEBUG)
 import re
 import itg
 
+
 class AhltaTemplate:
     
     # Constructor
@@ -22,7 +23,8 @@ class AhltaTemplate:
         self.header = []
         self.pages = {}
         
-        with open(fhand, 'r') as f:
+        with open(fhand, 'r', encoding='latin1') as f:
+            log.warning('file arbitrarily opened as latin1 encoding, unsure if this is best way')
             self.template = f.readlines()
 
         # TODO make this a try block

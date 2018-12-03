@@ -14,8 +14,9 @@ from template_models import AhltaTemplate
 # ===========================================================================+
 
 
-template_obj = AhltaTemplate('ahlta_template.txt')
-#template2 = ahlta_template('TSWF-Peds General.txt')
+#template_obj = AhltaTemplate('ahlta_template.txt')
+#template_obj = AhltaTemplate('TSWF-Peds General.txt')
+template2 = AhltaTemplate('TSWF-Peds General.txt')
 #print(template.info())
 #print(template.form_backcolor)
 #template.print_by_page(0)
@@ -27,9 +28,9 @@ template_obj = AhltaTemplate('ahlta_template.txt')
 
 
 
-template = []
-with open('ahlta_template.txt', 'r') as f:
-    template = f.readlines()
+#template = []
+#with open('ahlta_template.txt', 'r') as f:
+#    template = f.readlines()
 
 #raw = r'1,440,225,585,245,112344,8449,"R1|||||||19|80|YCN|0|0|X|X|0|||0|0|1|1|0||||","F=Arial|Y=6|K=16777215|T=T","Complete  ROS~A complete review of systems was performed and was negative, except as detailed above (minimum 10 systems).~ "'
 #raw2 = r'"one","two","three",  "four"'
@@ -44,5 +45,7 @@ raw5 = r'"L=V=13:DF=1:PS=1:TP=0:MR=T:BS=0:TWS=0:PB=2:NB=3:ROS=1:PL=1:FB=1:EM=1:C
 
 itg.Parser.parse_options(raw5)
 
-x = itg.Parser.detailed_parse(template_obj.pages[1][10])
-print(x)
+#x = itg.Parser.detailed_parse(template_obj.pages[1][10])
+#print(x)
+
+print(template2.info())
