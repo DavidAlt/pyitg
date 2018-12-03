@@ -12,9 +12,6 @@ log.setLevel(logging.DEBUG)
 #  AhltaTemplate: dictionary-based template model
 # ============================================================================
 
-
-#from ahlta_item import item_Parser as parse
-#from itg_utils import control_flag
 import re
 import itg
 
@@ -28,17 +25,26 @@ class AhltaTemplate:
         with open(fhand, 'r') as f:
             self.template = f.readlines()
 
-        self._validate_template()
-        self._import_template()
-        self._parse_header()
+        # TODO make this a try block
+        if self._validate_template():
+            self._parse_items()
+            self._parse_header()
+        else:
+            log.error('Template validation failed.')
 
-        
     # Private Methods
     def _validate_template(self):
-        pass
+        log.warning('partially implemented')
+        log.info(f'Form Signature:       {itg.Validator.validate_form_signature(self.template[0])}')
+        log.info(f'Form Identification:  {itg.Validator.validate_form_identification(self.template[1])}')
+        log.info(f'Form Object:          {itg.Validator.validate_form_obj(self.template[2])}')
+        log.info(f'Tabstrip Object:      {itg.Validator.validate_tabstrip_obj(self.template[3])}')
+        log.info(f'BrowseTree Object:    {itg.Validator.validate_browsetree_obj(self.template[4])}')
+        #log.info(f'Form Item:            {itg.Validator.validate_form_item(self.template[5])}')
+        return True
 
 
-    def _import_template(self):
+    def _parse_items(self):
         # Store items by page in a dictionary, using page numbers as keys
         line_num = 1
         for line in self.template:

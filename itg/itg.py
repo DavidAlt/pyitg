@@ -173,33 +173,30 @@ class Parser:
     #   Only use for "typical" items
     #   Description may cause problems if doesn't have ~
     def detailed_parse(item):
-        item = item.rstrip()
-        tokens = item.split(',', maxsplit=9)
+        tokens = Parser.simple_parse(item)
         prefix = tokens[7].replace('"','').split('|')
-        itemdata = tokens[8]
+        item_data = tokens[8]
         description = tokens[9].replace('"','').split('~')
         result = tokens[0:7]
         result += prefix
-        result.append(itemdata)
+        result.append(item_data)
         result += description
         return result
 
+
+    def parse_prefix(prefix):
+        return prefix.replace('"','').split('|')
+
     
     def parse_options(item_data):
-        log.warning('Does not parse L=V= properly')
-        # ToDo:
-        #   if empty, break
-        #   elif invalid delimiters, break
-        #   elif |, parse
-        #   elif :, parse and check for L=V
-        
+
         options = {}
         if item_data != r'""':
             
-            if ':' in item_data:
+            if ':' in item_data: # TabStrip item
                 tokens = [x.strip('"') for x in item_data.split(':')]
             
-            elif '|' in item_data:
+            elif '|' in item_data: # all other items
                 tokens = [x.strip('"') for x in item_data.split('|')]
                 
             else:
@@ -208,8 +205,18 @@ class Parser:
             for token in tokens: 
                 key = re.search('(.*?)(?==)', token).group(1)
                 value = re.search('(?<==)(.*)', token).group(1)
-                #log.info(key + ' :: ' + value)
-                options[key] = value            
+
+                if key == 'L':
+                    # split the value and add to dictionary
+                    new_key = re.search('(.*?)(?==)', value).group(1)
+                    new_value = re.search('(?<==)(.*)', value).group(1)
+
+                    value = '' # replace L's value with ''
+                    options[key] = value
+                    options[new_key] = new_value
+
+                else:
+                    options[key] = value
             
             #log.info(f'Tokens: {tokens}')
             #log.info(f'Dictionary: {options}')
@@ -220,6 +227,8 @@ class Parser:
         return options
 
 
+    def parse_description(description):
+        return description.replace('"','').split('~')
 
 # ============================================================================
 #  VALIDATOR: validates template or item data
@@ -334,3 +343,5 @@ class Validator:
 
     def validate_form_item(form_item):
         return len(form_item.split(',', maxsplit=9)) == 10
+
+

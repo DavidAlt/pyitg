@@ -1,6 +1,6 @@
 
 itg
-  constants
+  constants (Prefix, ControlFlag)
   class: Parser :: extracts information from the template or item strings
   class: Validator :: ensures information is valid
     
@@ -8,5 +8,9 @@ template_models
   class: AhltaTemplate :: template model, stores text in dictionary
   class: AhltaTemplateDF :: template model, stores text in dataframe
   class: AhltaTemplateXml :: template model, stores text as xml 
+
+color_converter
+  class: ColorType
+  color conversion functions
 
 #class: Converter :: converts between raw text, dictionary, dataframe, xml
